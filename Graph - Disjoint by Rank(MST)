@@ -1,7 +1,7 @@
 #include <bits/stdc++.h>
 using namespace std;
 class DisjointSet {
-    vector<int> rank, parent;
+    vector<int> rank, parent,size;
 public:
     DisjointSet(int n) {
         rank.resize(n + 1, 0);
@@ -9,17 +9,18 @@ public:
         for (int i = 0; i <= n; i++) {
             parent[i] = i;
         }
+        size.resize(n + 1,1);
     }
 
-    int findUPar(int node) {
+    int findPar(int node) {
         if (node == parent[node])
             return node;
-        return parent[node] = findUPar(parent[node]);
+        return parent[node] = findPar(parent[node]);
     }
 
     void unionByRank(int u, int v) {
-        int ulp_u = findUPar(u);
-        int ulp_v = findUPar(v);
+        int ulp_u = findPar(u);
+        int ulp_v = findPar(v);
         if (ulp_u == ulp_v) return;
         if (rank[ulp_u] < rank[ulp_v]) {
             parent[ulp_u] = ulp_v;
@@ -32,6 +33,38 @@ public:
             rank[ulp_u]++;
         }
     }
+
+    void union_by_size(int u , int v) {
+        int pu = findPar(u) , pv = findPar(v) ;
+
+        // if the ultimate parents are same --> they are already in a union
+        if(pu == pv) {
+            return ;
+        }
+
+        // now again there can be 3 cases: 
+        /* 
+        size[pu] < size[pv] --> connect pu to pv and increase the size of pv
+        size[pv] < size[pu]
+        size[pu] == size[pv] --> connect any one of them to other
+        */
+
+       if(size[pu] < size[pv]){
+            parent[pu] = pv ;
+            size[pv] += size[pu] ;
+       }
+       else{
+            // means either size[pu] == size[pv] or size[pu] > size[pv] --> in both the cases we can connect pv to pu
+
+            parent[pv] = pu ;
+            size[pu] += size[pv] ;
+       }
+    }
+
+    bool isSameComponent (int u, int v) {
+        return (findPar(u) == findPar(v)) ;
+    }
+
 };
 
 
